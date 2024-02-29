@@ -1,7 +1,5 @@
 FROM php:8.2-apache AS base
 
-MAINTAINER Papp Dániel <daniel.papp95@gmail.com>
-
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 # configure and install extra dependencies

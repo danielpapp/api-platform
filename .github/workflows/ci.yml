@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: ~
+  workflow_dispatch: ~
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check actions
+        uses: actions/checkout@v2
+
+      - name: Build Docker image and start container
+        run: docker compose up -d --build
+
+      - name: Install PHP dependencies
+        run: docker compose exec -T php composer install
+
+      - name: Buffering time for db container
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '30s'
+
+      - name: Set execute permissions on Symfony Console
+        run: docker compose exec -T php chmod +x bin/console
+
+      - name: Create database
+        run: docker compose exec -T php bin/console doctrine:database:create
+
+      - name: Run migrations
+        run: docker compose exec -T php bin/console doctrine:migrations:migrate
+
+      - name: Set execute permissions on PHPUnit
+        run: docker compose exec -T php chmod +x bin/phpunit
+
+      - name: Run PHPUnit
+        run: docker compose exec -T php bin/phpunit
+
+      - name: Run PHP_CodeSniffer
+        run: docker compose exec -T php vendor/bin/phpcs
+
+      - name: Run PHPStan
+        run: docker compose exec -T php vendor/bin/phpstan analyse
+
+      - name: Stop Docker container
+        run: docker compose down
