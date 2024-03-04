@@ -2,35 +2,17 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
-use App\State\UserProcessor;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
-use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table('users')]
-#[ApiResource(
-    operations: [
-        new Get(),
-        new GetCollection(),
-        new Post(
-            validationContext: ['groups' => ['Default', 'postValidation']],
-            processor: UserProcessor::class,
-        ),
-    ],
-    normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:write']],
-)]
 #[UniqueEntity('email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -67,9 +49,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $password = '';
 
     #[Groups(['user:write'])]
-    #[SerializedName('password')]
-    #[Assert\NotBlank(groups: ['postValidation'])]
-    #[Assert\Length(max: 255, groups: ['postValidation'])]
+    #[Assert\NotBlank(groups: ['setPassword'])]
+    #[Assert\Length(max: 255, groups: ['setPassword'])]
     private string $plainPassword = '';
 
     #[ORM\Column]

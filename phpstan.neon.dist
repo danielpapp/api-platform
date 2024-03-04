@@ -8,3 +8,5 @@ parameters:
     symfony:
         container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml
     checkGenericClassInNonGenericObjectType: false
+    ignoreErrors:
+        - '#Call to an undefined method .*|Zenstruck\\Foundry\\Proxy::.*#'
